@@ -4,13 +4,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start":"node run.js"
+    "start": "node run.js"
   },
   "author": "Badis Jlassi",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "@vitalets/google-translate-api": "^9.2.0",
+    "archiver": "^7.0.1",
     "axios": "^1.7.7",
     "cheerio": "^1.0.0",
     "compromise": "^14.14.2",

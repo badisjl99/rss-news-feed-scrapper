@@ -1,6 +1,7 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+const archiver = require("archiver");
 
 const { getBbc } = require("./bbc");
 const { getAbc } = require("./abc");
@@ -11,7 +12,6 @@ const { getTheLocal } = require("./theLocal");
 const app = express();
 const port = 3000;
 
-// Function to get the current timestamp
 function getTimestamp() {
     const now = new Date();
     const year = now.getFullYear();
@@ -24,7 +24,6 @@ function getTimestamp() {
     return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
 }
 
-// Function to scrape data and save it to a JSON file
 async function scrapeAndSaveData() {
     const scrapers = [
         { name: "BBC", func: getBbc },
@@ -45,10 +44,8 @@ async function scrapeAndSaveData() {
         }
     }
 
-    // Define the path for the output JSON file
     const outputPath = path.join(__dirname, `scraped_data_${getTimestamp()}.json`);
 
-    // Save the merged data to a JSON file
     fs.writeFileSync(outputPath, JSON.stringify(allArticles, null, 2));
     console.log(`Data successfully saved to ${outputPath}`);
 }
@@ -61,6 +58,40 @@ app.get("/gather", async (req, res) => {
         console.error("Error during scraping:", e);
         res.status(500).json({ message: "An error occurred during scraping", error: e.message });
     }
+});
+
+app.get("/download-json", (req, res) => {
+    const dir = path.join(__dirname);
+    const output = fs.createWriteStream(path.join(dir, 'scraped_data.zip'));
+    const archive = archiver('zip');
+
+    res.attachment('scraped_data.zip');
+    archive.pipe(output);
+
+    fs.readdir(dir, (err, files) => {
+        if (err) {
+            console.error("Error reading directory:", err);
+            return res.status(500).json({ message: "Error reading directory" });
+        }
+
+        files.forEach(file => {
+            if (file.endsWith('.json')) {
+                archive.file(path.join(dir, file), { name: file });
+            }
+        });
+
+        archive.finalize();
+    });
+
+    output.on('close', () => {
+        console.log(`${archive.pointer()} total bytes`);
+        console.log('Zip file has been finalized and the output file descriptor has closed.');
+    });
+
+    archive.on('error', err => {
+        console.error("Error during archiving:", err);
+        res.status(500).json({ message: "Error creating zip file" });
+    });
 });
 
 app.listen(port, () => {
