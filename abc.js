@@ -1,9 +1,8 @@
 const axios = require('axios');
 const cheerio = require('cheerio'); 
 const xml2js = require('xml2js');
-const { analyzeSentiment , extractKeywords ,getCategoryFromUrl} = require("./analyzer");
+const { analyzeSentiment, extractKeywords, getCategoryFromUrl } = require("./analyzer");
 const fs = require('fs');
-
 
 function formatDate(dateString) {
   const date = new Date(dateString);
@@ -12,7 +11,7 @@ function formatDate(dateString) {
 
 async function getAbc() {
   try {
-    const url = 'https://abcnews.go.com/abcnews/internationalheadlines'
+    const url = 'https://abcnews.go.com/abcnews/internationalheadlines';
     const response = await axios.get(url);
     const rssData = response.data;
 
@@ -73,5 +72,4 @@ async function getAbc() {
   }
 }
 
-module .exports={getAbc};
-
+module.exports = { getAbc };

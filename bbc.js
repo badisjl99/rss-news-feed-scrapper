@@ -1,19 +1,18 @@
 const axios = require('axios');
 const xml2js = require('xml2js');
-const { analyzeSentiment,extractKeywords } = require("./analyzer");
-const fs = require('fs');
+const { analyzeSentiment, extractKeywords } = require("./analyzer");
 
 const rssUrls = [
   "https://feeds.bbci.co.uk/news/world/africa/rss.xml",
   "http://feeds.bbci.co.uk/news/world/asia/rss.xml",
-  "http://feeds.bbci.co.uk/news/world/europe/rss.xml",
-  "http://feeds.bbci.co.uk/news/world/latin_america/rss.xml",
-  "http://feeds.bbci.co.uk/news/world/middle_east/rss.xml",
-  "http://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml",
+  "https://feeds.bbci.co.uk/news/world/europe/rss.xml",
+  "https://feeds.bbci.co.uk/news/world/latin_america/rss.xml",
+  "https://feeds.bbci.co.uk/news/world/middle_east/rss.xml",
+  "https://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml",
   "https://feeds.bbci.co.uk/news/business/rss.xml",
   "https://feeds.bbci.co.uk/news/politics/rss.xml",
   "https://feeds.bbci.co.uk/news/health/rss.xml",
-  "http://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
+  "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
   "https://feeds.bbci.co.uk/news/education/rss.xml",
   "https://feeds.bbci.co.uk/news/technology/rss.xml",
   "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml"
@@ -97,11 +96,11 @@ async function getBbc() {
     const results = await Promise.all(fetchPromises);
     const allArticles = results.flat(); // Flatten the array of arrays
 
-    fs.writeFileSync('data/bbc.json', JSON.stringify(allArticles, null, 2), 'utf-8');
-    console.log("All articles saved to bbc.json");
+    return allArticles; // Return the articles as JSON
   } catch (error) {
     console.error("Error in getBbc:", error);
+    return [];
   }
 }
 
-module.exports = {getBbc} ;
+module.exports = { getBbc };

@@ -1,6 +1,5 @@
 const axios = require('axios');
 const xml2js = require('xml2js');
-const fs = require('fs'); // Import file system module
 const { analyzeSentiment, extractKeywords } = require("./analyzer");
 
 const rssUrls = [
@@ -66,19 +65,20 @@ async function fetchRssFeed(url) {
       };
     });
 
-    // Save to a JSON file
-    fs.writeFileSync('data/india-today.json', JSON.stringify(formattedItems, null, 2), 'utf-8');
-    console.log('RSS feed saved as india-today.json');
+    return formattedItems; // Return the formatted items as JSON
   } catch (error) {
     console.error("Error fetching RSS feed:", error);
+    return []; // Return an empty array on error
   }
 }
 
 async function getIndiaToday() {
   try {
-    await Promise.all(rssUrls.map(url => fetchRssFeed(url)));
+    const results = await Promise.all(rssUrls.map(url => fetchRssFeed(url)));
+    return results.flat(); // Flatten the results array
   } catch (error) {
     console.error("Error in getIndiaToday:", error);
+    return []; // Return an empty array on error
   }
 }
 

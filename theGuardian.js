@@ -1,11 +1,9 @@
 const axios = require('axios');
 const xml2js = require('xml2js');
 const { analyzeSentiment, extractKeywords } = require("./analyzer");
-const fs = require('fs');
 const cheerio = require('cheerio'); 
 
 const rssUrls = [
-
   "https://www.theguardian.com/world/morocco/rss",
   "https://www.theguardian.com/world/tunisia/rss",
   "https://www.theguardian.com/world/egypt/rss",
@@ -26,7 +24,7 @@ const rssUrls = [
   "https://www.theguardian.com/football/rss",
   "https://www.theguardian.com/science/rss",
   "https://www.theguardian.com/world/middleeast/rss"
-  ];
+];
 
 function getCategoryFromUrl(url) {
   const categories = {
@@ -101,8 +99,7 @@ async function getTheGuardian() {
     const articles = await fetchRssFeed(url);
     allArticles.push(...articles);
   }
-  fs.writeFileSync('data/theguardian-rss.json', JSON.stringify(allArticles, null, 2), 'utf-8');
-  console.log("All articles saved to theguardian-rss.json");
+  return allArticles; // Return the articles instead of saving to a file
 }
 
 module.exports = { getTheGuardian };

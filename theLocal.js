@@ -1,6 +1,5 @@
 const axios = require('axios');
 const xml2js = require('xml2js');
-const fs = require('fs');
 const { analyzeSentiment, extractKeywords } = require("./analyzer");
 
 const rssUrls = [
@@ -26,20 +25,12 @@ async function fetchRssFeed(url) {
       mergeAttrs: true
     });
 
-    const result = await new Promise((resolve, reject) => {
-      parser.parseString(rssData, (err, result) => {
-        if (err) {
-          return reject("Error parsing XML: " + err);
-        }
-        resolve(result);
-      });
-    });
-
+    const result = await parser.parseStringPromise(rssData);
     const channel = result.rss.channel;
     const items = Array.isArray(channel.item) ? channel.item : [channel.item];
     const category = getCategoryFromUrl(url);
 
-    const formattedItems = items.map(item => {
+    return items.map(item => {
       const description = item.description?.trim();
       const keywords = extractKeywords(item.title?.trim());
       const label = analyzeSentiment(description);
@@ -61,22 +52,20 @@ async function fetchRssFeed(url) {
         category
       };
     });
-
-    // Save to JSON file
-    const outputFileName = 'data/thelocal.json';
-    fs.writeFileSync(outputFileName, JSON.stringify(formattedItems, null, 2), 'utf-8');
-    console.log(`RSS data saved to ${outputFileName}`);
     
   } catch (error) {
     console.error("Error fetching RSS feed:", error);
+    return [];
   }
 }
 
 async function getTheLocal() {
   try {
-    await Promise.all(rssUrls.map(url => fetchRssFeed(url)));
+    const allArticles = await Promise.all(rssUrls.map(url => fetchRssFeed(url)));
+    return allArticles.flat(); // Flatten the array of arrays
   } catch (error) {
     console.error("Error in getTheLocal:", error);
+    return [];
   }
 }
 
