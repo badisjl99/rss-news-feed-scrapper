@@ -12,6 +12,7 @@ const { getTheLocal } = require("./theLocal");
 const app = express();
 const port = 3000;
 
+// Function to get the current timestamp
 function getTimestamp() {
     const now = new Date();
     const year = now.getFullYear();
@@ -24,6 +25,7 @@ function getTimestamp() {
     return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
 }
 
+// Function to scrape data and save it to a JSON file
 async function scrapeAndSaveData() {
     const scrapers = [
         { name: "BBC", func: getBbc },
@@ -60,14 +62,16 @@ app.get("/gather", async (req, res) => {
     }
 });
 
+// New endpoint to download all JSON files
 app.get("/download-json", (req, res) => {
-    const dir = path.join(__dirname);
+    const dir = __dirname; // Directory containing JSON files
     const output = fs.createWriteStream(path.join(dir, 'scraped_data.zip'));
     const archive = archiver('zip');
 
-    res.attachment('scraped_data.zip');
+    res.attachment('scraped_data.zip'); // Set the header for file download
     archive.pipe(output);
 
+    // Append JSON files to the archive
     fs.readdir(dir, (err, files) => {
         if (err) {
             console.error("Error reading directory:", err);
@@ -85,7 +89,6 @@ app.get("/download-json", (req, res) => {
 
     output.on('close', () => {
         console.log(`${archive.pointer()} total bytes`);
-        console.log('Zip file has been finalized and the output file descriptor has closed.');
     });
 
     archive.on('error', err => {
