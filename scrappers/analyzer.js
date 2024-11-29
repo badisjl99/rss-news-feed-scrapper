@@ -39,28 +39,45 @@ function getCategoryFromUrl(url) {
 function analyzeSentiment(text) {
   const sentimentResult = vader.SentimentIntensityAnalyzer.polarity_scores(text);
   const compound = sentimentResult.compound;
-  console.log(compound);
-  if (compound >= 0.05) {
-    return 'positive';
-  } else if (compound <= -0.05) {
-    return 'negative';
+
+  let label;
+  if (compound >= 0.6) {
+    label = 'very positive';
+  } else if (compound >= 0.3) {
+    label = 'positive';
+  } else if (compound > 0.05) {
+    label = 'slightly positive';
+  } else if (compound > -0.05) {
+    label = 'neutral';
+  } else if (compound > -0.3) {
+    label = 'slightly negative';
+  } else if (compound > -0.6) {
+    label = 'negative';
   } else {
-    return 'neutral';
+    label = 'very negative';
   }
+
+  return `${label}|${compound}`;
 }
 
 function extractKeywords(text) {
   const doc = nlp(text);
 
-  const events = doc.topics().out('array'); // For places and events
-  const people = doc.people().out('array'); // For persons
-  const nouns = doc.nouns().out('array'); // For nouns in general
+  // Extract distinct types of entities
+  const events = doc.topics().out('array'); // Extract topics or events
+  const people = doc.people().out('array'); // Extract names of people
+  const nouns = doc.nouns().out('array');  // Extract general nouns
 
-  const keywords = [...new Set([...events, ...people, ...nouns])];
+  // Merge and deduplicate results
+  const keywordsSet = new Set([...events, ...people, ...nouns]);
 
-  return keywords.join(' - ');
+  // Ensure no phrases or sentences are included, only tokens
+  const filteredKeywords = Array.from(keywordsSet).filter(
+    (keyword) => keyword.trim().split(/\s+/).length === 1 // Keep single tokens only
+  );
+
+  return filteredKeywords.join(' - '); // Join keywords with separator
 }
-
 
 
 

@@ -19,7 +19,6 @@ const rssUrls = [
   "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml"
 ];
 
-// Helper function to determine the category based on the URL
 function getCategoryFromUrl(url) {
   if (url.includes("africa")) return "Africa";
   if (url.includes("asia")) return "Asia";
@@ -37,13 +36,11 @@ function getCategoryFromUrl(url) {
   return "Unknown";
 }
 
-// Helper function to format the publication date
 function formatDate(dateString) {
   const date = new Date(dateString);
   return date.toISOString().split('T')[0];
 }
 
-// Function to fetch and process each RSS feed
 async function fetchRssFeed(url) {
   try {
     const response = await axios.get(url);
@@ -64,9 +61,10 @@ async function fetchRssFeed(url) {
         const channel = result.rss.channel;
         const items = Array.isArray(channel.item) ? channel.item : [channel.item];
         const category = getCategoryFromUrl(url);
-        const keywords = extractKeywords(item.title);
+        
         const formattedItems = items.map(item => {
           const description = item.description;
+          const keywords = extractKeywords(item.title); 
           const label = analyzeSentiment(description);
 
           return {
@@ -76,15 +74,15 @@ async function fetchRssFeed(url) {
             date: formatDate(item.pubDate),
             articleImage: item['media:thumbnail'] ? item['media:thumbnail'].url : null,
             label: label,
-            source: "BBC",
-            keywords : keywords,
+            source: "left-center",
+            keywords: keywords,
             relatedCountry: "United Kingdom",
-            bias: "left",
+            bias: "left-center",
             category: category
           };
         });
 
-        resolve(formattedItems); // Return the formatted items for this feed
+        resolve(formattedItems); 
       });
     });
   } catch (error) {
@@ -93,17 +91,17 @@ async function fetchRssFeed(url) {
   }
 }
 
-// Main function to process all feeds and save to a single JSON file
-async function processAllFeeds() {
-  const allArticles = [];
+async function getBbc() {
+  try {
+    const fetchPromises = rssUrls.map(url => fetchRssFeed(url));
+    const results = await Promise.all(fetchPromises);
+    const allArticles = results.flat(); // Flatten the array of arrays
 
-  for (const url of rssUrls) {
-    const articles = await fetchRssFeed(url);
-    allArticles.push(...articles); // Combine all articles into one array
+    fs.writeFileSync('data/bbc.json', JSON.stringify(allArticles, null, 2), 'utf-8');
+    console.log("All articles saved to bbc.json");
+  } catch (error) {
+    console.error("Error in getBbc:", error);
   }
-
-  fs.writeFileSync('bbc-rss.json', JSON.stringify(allArticles, null, 2), 'utf-8');
-  console.log("All articles saved to all_rss_data.json");
 }
 
-processAllFeeds();
+module.exports = {getBbc} ;
