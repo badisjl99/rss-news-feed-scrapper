@@ -68,3 +68,5 @@ async function getAbc() {
     return [];
   }
 }
+
+module.exports = { getAbc };
