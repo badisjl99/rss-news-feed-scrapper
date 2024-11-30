@@ -72,7 +72,6 @@ app.get("/", (req, res) => {
             return res.status(500).send("Error reading directory");
         }
 
-        // Filter files to only include those that start with 'scraped_data'
         const jsonFiles = files.filter(file => file.startsWith('scraped_data') && file.endsWith('.json'));
         res.render("index", { jsonFiles });
     });

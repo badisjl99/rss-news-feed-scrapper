@@ -73,12 +73,19 @@ async function fetchRssFeed(url) {
     return items.map(item => {
       const $ = cheerio.load(item.description || '');
       const cleanDescription = $.text().trim();
+      
+      // Check if media:content exists and handle it properly
+      const mediaContents = item['media:content'];
+      const articleImage = Array.isArray(mediaContents) 
+        ? mediaContents[0]?.url || null 
+        : mediaContents?.url || null;
+
       return {
         headline: item.title,
         articleUrl: item.link,
         description: cleanDescription,
         date: formatDate(item.pubDate),
-        articleImage: item['media:content']?.[0]?.url || null,
+        articleImage: articleImage,
         label: analyzeSentiment(cleanDescription),
         source: "The Guardian",
         keywords: extractKeywords(item.title),
