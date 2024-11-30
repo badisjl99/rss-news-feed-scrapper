@@ -80,11 +80,12 @@ app.get("/", (req, res) => {
 });
 
 app.get("/download-json", (req, res) => {
-    const output = fs.createWriteStream(path.join(jsonDirectory, 'scraped_data.zip'));
+    // Set the response to indicate a file download
+    res.attachment('scraped_data.zip');
     const archive = archiver('zip');
 
-    res.attachment('scraped_data.zip');
-    archive.pipe(output);
+    // Pipe the archive data to the response
+    archive.pipe(res);
 
     fs.readdir(jsonDirectory, (err, files) => {
         if (err) {
@@ -100,11 +101,6 @@ app.get("/download-json", (req, res) => {
         });
 
         archive.finalize();
-    });
-
-    output.on('close', () => {
-        console.log(`${archive.pointer()} total bytes`);
-        console.log('Zip file has been finalized and the output file descriptor has closed.');
     });
 
     archive.on('error', err => {
