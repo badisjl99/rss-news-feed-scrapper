@@ -3,22 +3,19 @@ const fs = require("fs");
 const path = require("path");
 const archiver = require("archiver");
 
+const { getBbc } = require("./bbc");
+const { getAbc } = require("./abc");
+const { getIndiaToday } = require("./indiaToday");
+const { getTheGuardian } = require("./theGuardian");
+const { getTheLocal } = require("./theLocal");
+
 const app = express();
 const port = 3000;
 
-<<<<<<< HEAD
-// Set EJS as the template engine
+// Set up EJS
 app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
+app.set("views", path.join(__dirname, "views"));  // Ensure this directory exists
 
-// Path to JSON directory
-const JSON_DIR = "/opt/render/project/src";
-
-// Route to display JSON files in a download page
-app.get("/", (req, res) => {
-    fs.readdir(JSON_DIR, (err, files) => {
-=======
-// Function to get the current timestamp
 function getTimestamp() {
     const now = new Date();
     const year = now.getFullYear();
@@ -31,7 +28,6 @@ function getTimestamp() {
     return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
 }
 
-// Function to scrape data and save it to a JSON file
 async function scrapeAndSaveData() {
     const scrapers = [
         { name: "BBC", func: getBbc },
@@ -68,70 +64,55 @@ app.get("/gather", async (req, res) => {
     }
 });
 
-// New endpoint to download all JSON files
-app.get("/download-json", (req, res) => {
-    const dir = __dirname; // Directory containing JSON files
-    const output = fs.createWriteStream(path.join(dir, 'scraped_data.zip'));
-    const archive = archiver('zip');
-
-    res.attachment('scraped_data.zip'); // Set the header for file download
-    archive.pipe(output);
-
-    // Append JSON files to the archive
+app.get("/", (req, res) => {
+    const dir = path.join(__dirname);
     fs.readdir(dir, (err, files) => {
->>>>>>> ff432cec915b8c6e0dd6adba04d7f751e0a03f07
         if (err) {
             console.error("Error reading directory:", err);
             return res.status(500).send("Error reading directory");
         }
 
-        const jsonFiles = files.filter(file => file.endsWith(".json"));
-        res.render("downloadPage", { jsonFiles });
+        // Filter files to only include those that start with 'scraped_data'
+        const jsonFiles = files.filter(file => file.startsWith('scraped_data') && file.endsWith('.json'));
+        res.render("index", { jsonFiles });
     });
 });
 
-// Route to download all JSON files as a zip
-app.get("/download-all", (req, res) => {
-    const output = fs.createWriteStream(path.join(__dirname, "scraped_data.zip"));
-    const archive = archiver("zip");
+app.get("/download-json", (req, res) => {
+    const dir = path.join(__dirname);
+    const output = fs.createWriteStream(path.join(dir, 'scraped_data.zip'));
+    const archive = archiver('zip');
 
-    res.attachment("scraped_data.zip");
-    archive.pipe(res);
+    res.attachment('scraped_data.zip');
+    archive.pipe(output);
 
-    fs.readdir(JSON_DIR, (err, files) => {
+    fs.readdir(dir, (err, files) => {
         if (err) {
             console.error("Error reading directory:", err);
-            return res.status(500).send("Error reading directory");
+            return res.status(500).json({ message: "Error reading directory" });
         }
 
+        // Include only files that start with 'scraped_data'
         files.forEach(file => {
-            if (file.endsWith(".json")) {
-                archive.file(path.join(JSON_DIR, file), { name: file });
+            if (file.startsWith('scraped_data') && file.endsWith('.json')) {
+                archive.file(path.join(dir, file), { name: file });
             }
         });
 
         archive.finalize();
     });
 
-<<<<<<< HEAD
-    archive.on("error", err => {
-=======
     output.on('close', () => {
         console.log(`${archive.pointer()} total bytes`);
+        console.log('Zip file has been finalized and the output file descriptor has closed.');
     });
 
     archive.on('error', err => {
->>>>>>> ff432cec915b8c6e0dd6adba04d7f751e0a03f07
         console.error("Error during archiving:", err);
-        res.status(500).send("Error creating zip file");
+        res.status(500).json({ message: "Error creating zip file" });
     });
 });
 
-// Start the server
 app.listen(port, () => {
-<<<<<<< HEAD
-    console.log(`Server running at http://localhost:${port}`);
-=======
     console.log(`Web server running at http://localhost:${port}`);
->>>>>>> ff432cec915b8c6e0dd6adba04d7f751e0a03f07
 });
