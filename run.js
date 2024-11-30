@@ -12,7 +12,9 @@ const { getTheLocal } = require("./theLocal");
 const app = express();
 const port = 3000;
 
-// Set up EJS
+// Set the directory where JSON files are stored
+const jsonDirectory = path.join('/opt/render/project/src');
+
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));  // Ensure this directory exists
 
@@ -48,7 +50,7 @@ async function scrapeAndSaveData() {
         }
     }
 
-    const outputPath = path.join(__dirname, `scraped_data_${getTimestamp()}.json`);
+    const outputPath = path.join(jsonDirectory, `scraped_data_${getTimestamp()}.json`);
 
     fs.writeFileSync(outputPath, JSON.stringify(allArticles, null, 2));
     console.log(`Data successfully saved to ${outputPath}`);
@@ -65,8 +67,7 @@ app.get("/gather", async (req, res) => {
 });
 
 app.get("/", (req, res) => {
-    const dir = path.join(__dirname);
-    fs.readdir(dir, (err, files) => {
+    fs.readdir(jsonDirectory, (err, files) => {
         if (err) {
             console.error("Error reading directory:", err);
             return res.status(500).send("Error reading directory");
@@ -78,14 +79,14 @@ app.get("/", (req, res) => {
 });
 
 app.get("/download-json", (req, res) => {
-    const dir = path.join(__dirname);
-    const output = fs.createWriteStream(path.join(dir, 'scraped_data.zip'));
+    // Set the response to indicate a file download
+    res.attachment('scraped_data.zip');
     const archive = archiver('zip');
 
-    res.attachment('scraped_data.zip');
-    archive.pipe(output);
+    // Pipe the archive data to the response
+    archive.pipe(res);
 
-    fs.readdir(dir, (err, files) => {
+    fs.readdir(jsonDirectory, (err, files) => {
         if (err) {
             console.error("Error reading directory:", err);
             return res.status(500).json({ message: "Error reading directory" });
@@ -94,16 +95,11 @@ app.get("/download-json", (req, res) => {
         // Include only files that start with 'scraped_data'
         files.forEach(file => {
             if (file.startsWith('scraped_data') && file.endsWith('.json')) {
-                archive.file(path.join(dir, file), { name: file });
+                archive.file(path.join(jsonDirectory, file), { name: file });
             }
         });
 
         archive.finalize();
-    });
-
-    output.on('close', () => {
-        console.log(`${archive.pointer()} total bytes`);
-        console.log('Zip file has been finalized and the output file descriptor has closed.');
     });
 
     archive.on('error', err => {
