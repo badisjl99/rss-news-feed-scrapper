@@ -1,13 +1,6 @@
 const axios = require('axios');
-const cheerio = require('cheerio'); 
 const xml2js = require('xml2js');
-const { analyzeSentiment, extractKeywords, getCategoryFromUrl } = require("./analyzer");
-const fs = require('fs');
-
-function formatDate(dateString) {
-  const date = new Date(dateString);
-  return date.toISOString().split('T')[0];
-}
+const cheerio = require('cheerio');
 
 async function getAbc() {
   try {
@@ -35,15 +28,19 @@ async function getAbc() {
           // Clean HTML tags from description
           const rawDescription = item.description || '';
           const $ = cheerio.load(rawDescription);
-          const cleanDescription = $.text().trim(); // Extract plain text and trim whitespace
+          const cleanDescription = $.text().trim();
 
           const label = analyzeSentiment(cleanDescription);
           const keywords = extractKeywords(item.title);
 
           // Handle media content for images
           let imageUrl = null;
-          if (item['media:content'] && item['media:content'].url) {
-            imageUrl = item['media:content'].url;
+          if (Array.isArray(item['media:thumbnail'])) {
+            // Choose the best thumbnail based on resolution or other criteria
+            const sortedThumbnails = item['media:thumbnail'].sort(
+              (a, b) => parseInt(b.width, 10) - parseInt(a.width, 10)
+            );
+            imageUrl = sortedThumbnails[0]?.url || null; // Pick the largest image
           } else if (item['media:thumbnail'] && item['media:thumbnail'].url) {
             imageUrl = item['media:thumbnail'].url;
           }
@@ -51,11 +48,11 @@ async function getAbc() {
           return {
             headline: item.title,
             articleUrl: item.link,
-            description: cleanDescription, // Use cleaned description here
+            description: cleanDescription,
             date: formatDate(item.pubDate),
             articleImage: imageUrl,
             label: label,
-            source: "The Guardian",
+            source: "ABC News",
             keywords: keywords,
             relatedCountry: "United Kingdom",
             bias: "left",
@@ -71,5 +68,3 @@ async function getAbc() {
     return [];
   }
 }
-
-module.exports = { getAbc };
