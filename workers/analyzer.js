@@ -37,24 +37,9 @@ function analyzeSentiment(text) {
   const sentimentResult = vader.SentimentIntensityAnalyzer.polarity_scores(text);
   const compound = sentimentResult.compound;
 
-  let label;
-  if (compound >= 0.6) {
-    label = 'very positive';
-  } else if (compound >= 0.3) {
-    label = 'positive';
-  } else if (compound > 0.05) {
-    label = 'slightly positive';
-  } else if (compound > -0.05) {
-    label = 'neutral';
-  } else if (compound > -0.3) {
-    label = 'slightly negative';
-  } else if (compound > -0.6) {
-    label = 'negative';
-  } else {
-    label = 'very negative';
-  }
 
-  return `${label}|${compound}`;
+
+  return compound;
 }
 function extractKeywords(headline) {
   if (!headline || typeof headline !== 'string') {

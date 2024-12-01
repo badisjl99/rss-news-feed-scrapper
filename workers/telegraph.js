@@ -17,6 +17,9 @@ async function fetchTelegraphNewsFeed(url) {
     const channel = result.rss.channel;
     const items = Array.isArray(channel.item) ? channel.item : [channel.item];
 
+    // Determine category based on the URL
+    const category = url.includes('sport') ? 'Sports' : url.includes('politics') ? 'Politics' : 'World & UK';
+
     const articles = await Promise.all(items.map(async (item) => {
       const description = item.description?.trim();
       const headline = item.title?.trim();
@@ -45,8 +48,8 @@ async function fetchTelegraphNewsFeed(url) {
         source: "Daily Telegraph",
         relatedCountry: "United Kingdom",
         keywords,
-        bias: "right", 
-        category: "World & UK"
+        bias: "right",  // Modify as needed based on your sentiment analysis
+        category,  // Assign category based on the URL
       };
     }));
 
@@ -58,10 +61,15 @@ async function fetchTelegraphNewsFeed(url) {
 }
 
 async function getTelegraphNews() {
-  const rssUrl = "https://www.telegraph.co.uk/rss.xml";
+  const rssUrls = [
+    "https://www.telegraph.co.uk/sport/rss.xml",
+    "https://www.telegraph.co.uk/politics/rss.xml",
+    "https://www.telegraph.co.uk/rss.xml"
+  ];
+
   try {
-    const articles = await fetchTelegraphNewsFeed(rssUrl);
-    return articles;
+    const articles = await Promise.all(rssUrls.map(url => fetchTelegraphNewsFeed(url)));
+    return articles.flat();  // Flatten the array of arrays into a single array of articles
   } catch (error) {
     console.error("Error in getTelegraphNews:", error);
     return [];
