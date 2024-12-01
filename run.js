@@ -3,11 +3,12 @@ const fs = require("fs");
 const path = require("path");
 const archiver = require("archiver");
 
-const { getBbc } = require("./bbc");
-const { getABCNews } = require("./abc");
-const { getIndiaToday } = require("./indiaToday");
-const { getTheGuardian } = require("./theGuardian");
-const { getTheLocal } = require("./theLocal");
+const { getBbc } = require("./workers/bbc");
+const { getABCNews } = require("./workers/abc");
+const { getIndiaToday } = require("./workers/indiaToday");
+const { getTheGuardian } = require("./workers/theGuardian");
+const { getTheLocal } = require("./workers/theLocal");
+const { getTelegraphNews} = require("./workers/telegraph") ;
 
 const app = express();
 const port = 3000;
@@ -36,7 +37,8 @@ async function scrapeAndSaveData() {
         { name: "The Guardian", func: getTheGuardian },
         { name: "India Today", func: getIndiaToday },
         { name: "The Local", func: getTheLocal },
-        { name: "ABC", func: getABCNews }
+        { name: "ABC", func: getABCNews } ,
+        { name: "Daily Telegraph", func: getTelegraphNews }
     ];
 
     const allArticles = [];
