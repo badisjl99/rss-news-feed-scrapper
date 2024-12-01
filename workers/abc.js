@@ -37,7 +37,7 @@ async function fetchABCNewsFeed(url) {
         headline,
         articleUrl,
         description,
-        date: formattedDate(pubDate),
+        date: formattedDate,
         articleImage,
         label: sentimentLabel,
         source: "ABC News",
