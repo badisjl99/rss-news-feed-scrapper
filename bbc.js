@@ -73,7 +73,7 @@ async function fetchRssFeed(url) {
             date: formatDate(item.pubDate),
             articleImage: item['media:thumbnail'] ? item['media:thumbnail'].url : null,
             label: label,
-            source: "left-center",
+            source: "BBC",
             keywords: keywords,
             relatedCountry: "United Kingdom",
             bias: "left-center",

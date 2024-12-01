@@ -4,7 +4,7 @@ const path = require("path");
 const archiver = require("archiver");
 
 const { getBbc } = require("./bbc");
-const { getAbc } = require("./abc");
+const { getABCNews } = require("./abc");
 const { getIndiaToday } = require("./indiaToday");
 const { getTheGuardian } = require("./theGuardian");
 const { getTheLocal } = require("./theLocal");
@@ -36,7 +36,7 @@ async function scrapeAndSaveData() {
         { name: "The Guardian", func: getTheGuardian },
         { name: "India Today", func: getIndiaToday },
         { name: "The Local", func: getTheLocal },
-        { name: "ABC", func: getAbc }
+        { name: "ABC", func: getABCNews }
     ];
 
     const allArticles = [];

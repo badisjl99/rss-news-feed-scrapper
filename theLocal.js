@@ -34,8 +34,6 @@ async function fetchRssFeed(url) {
       const description = item.description?.trim();
       const keywords = extractKeywords(item.title?.trim());
       const label = analyzeSentiment(description);
-
-      // Extract image URL from the 'enclosure' tag
       const articleImage = item.enclosure?.url?.trim() || null;
 
       return {
@@ -62,7 +60,7 @@ async function fetchRssFeed(url) {
 async function getTheLocal() {
   try {
     const allArticles = await Promise.all(rssUrls.map(url => fetchRssFeed(url)));
-    return allArticles.flat(); // Flatten the array of arrays
+    return allArticles.flat(); 
   } catch (error) {
     console.error("Error in getTheLocal:", error);
     return [];

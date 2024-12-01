@@ -1,7 +1,6 @@
 const vader = require('vader-sentiment');
 const nlp = require('compromise');
 
-// RSS feed URLs
 const rssUrls = [
   "https://feeds.bbci.co.uk/news/world/africa/rss.xml",
   "http://feeds.bbci.co.uk/news/world/asia/rss.xml",
@@ -18,7 +17,6 @@ const rssUrls = [
   "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml"
 ];
 
-// Get category from URL
 function getCategoryFromUrl(url) {
   if (url.includes("africa")) return "Africa";
   if (url.includes("asia")) return "Asia";
@@ -35,7 +33,6 @@ function getCategoryFromUrl(url) {
   if (url.includes("entertainment_and_arts")) return "Entertainment & Arts";
   return "Unknown"; 
 }
-
 function analyzeSentiment(text) {
   const sentimentResult = vader.SentimentIntensityAnalyzer.polarity_scores(text);
   const compound = sentimentResult.compound;
@@ -59,26 +56,32 @@ function analyzeSentiment(text) {
 
   return `${label}|${compound}`;
 }
+function extractKeywords(headline) {
+  if (!headline || typeof headline !== 'string') {
+      throw new Error('Invalid input. Please provide a valid string.');
+  }
 
-function extractKeywords(text) {
-  const doc = nlp(text);
+  // Parse the text using compromise
+  const doc = nlp(headline);
 
-  // Extract distinct types of entities
-  const events = doc.topics().out('array'); // Extract topics or events
-  const people = doc.people().out('array'); // Extract names of people
-  const nouns = doc.nouns().out('array');  // Extract general nouns
+  // Extract meaningful words (nouns, proper nouns)
+  const keywords = doc.nouns().out('array');
 
-  // Merge and deduplicate results
-  const keywordsSet = new Set([...events, ...people, ...nouns]);
+  // Return unique and cleaned keywords
+  return [...new Set(keywords.map(word => word.trim()))];
+}
+function dateToTimestamp(date) {
+  if (!date || typeof date !== 'string') {
+      throw new Error('Invalid input. Please provide a valid date string.');
+  }
 
-  // Ensure no phrases or sentences are included, only tokens
-  const filteredKeywords = Array.from(keywordsSet).filter(
-    (keyword) => keyword.trim().split(/\s+/).length === 1 // Keep single tokens only
-  );
+  const timestamp = new Date(date).getTime();
 
-  return filteredKeywords.join(' - '); // Join keywords with separator
+  if (isNaN(timestamp)) {
+      throw new Error('Invalid date format. Ensure the date is valid.');
+  }
+
+  return timestamp;
 }
 
-
-
-module.exports = { analyzeSentiment, getCategoryFromUrl, extractKeywords, rssUrls };
+module.exports = { analyzeSentiment, getCategoryFromUrl, extractKeywords, rssUrls,dateToTimestamp };
