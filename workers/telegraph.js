@@ -42,7 +42,7 @@ async function fetchTelegraphNewsFeed(url) {
         headline,
         articleUrl,
         description: cleanDescription,
-        date: dateToTimestamp(pubDate),
+        date: formattedDate,
         articleImage,
         label: sentimentLabel,
         source: "Daily Telegraph",

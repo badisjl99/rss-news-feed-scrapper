@@ -70,7 +70,7 @@ async function fetchRssFeed(url) {
             headline: item.title,
             articleUrl: item.link,
             description: description,
-            date: dateToTimestamp(item.pubDate),
+            date: formatDate(item.pubDate),
             articleImage: item['media:thumbnail'] ? item['media:thumbnail'].url : null,
             label: label,
             source: "BBC",

@@ -40,7 +40,7 @@ async function fetchRssFeed(url) {
         headline: item.title?.trim(),
         articleUrl: item.link?.trim(),
         description,
-        date: dateToTimestamp(item.pubDate),
+        date: formatDate(item.pubDate),
         articleImage,
         label,
         source: "The Local",

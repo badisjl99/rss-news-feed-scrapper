@@ -54,7 +54,7 @@ async function fetchRssFeed(url) {
         headline: item.title,
         articleUrl: item.link.trim(),
         description: description.trim(),
-        date: dateToTimestamp(item.pubDate),
+        date: formatDate(item.pubDate),
         articleImage: articleImage,
         label: label,
         keywords: keywords,

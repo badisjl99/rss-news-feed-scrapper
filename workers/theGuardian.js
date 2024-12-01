@@ -84,7 +84,7 @@ async function fetchRssFeed(url) {
         headline: item.title,
         articleUrl: item.link,
         description: cleanDescription,
-        date: dateToTimestamp(item.pubDate),
+        date: formatDate(item.pubDate),
         articleImage: articleImage,
         label: analyzeSentiment(cleanDescription),
         source: "The Guardian",
