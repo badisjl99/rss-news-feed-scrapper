@@ -1,6 +1,6 @@
 const axios = require('axios');
 const xml2js = require('xml2js');
-const { analyzeSentiment, extractKeywords } = require("./analyzer");
+const { analyzeSentiment, extractKeywords ,dateToTimestamp} = require("./analyzer");
 
 const rssUrls = [
   "https://feeds.thelocal.com/rss/es"
@@ -40,7 +40,7 @@ async function fetchRssFeed(url) {
         headline: item.title?.trim(),
         articleUrl: item.link?.trim(),
         description,
-        date: formatDate(item.pubDate),
+        date: dateToTimestamp(item.pubDates),
         articleImage,
         label,
         source: "The Local",

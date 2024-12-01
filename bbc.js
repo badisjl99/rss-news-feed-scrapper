@@ -1,6 +1,6 @@
 const axios = require('axios');
 const xml2js = require('xml2js');
-const { analyzeSentiment, extractKeywords } = require("./analyzer");
+const { analyzeSentiment, extractKeywords ,dateToTimestamp} = require("./analyzer");
 
 const rssUrls = [
   "https://feeds.bbci.co.uk/news/world/africa/rss.xml",
@@ -70,7 +70,7 @@ async function fetchRssFeed(url) {
             headline: item.title,
             articleUrl: item.link,
             description: description,
-            date: formatDate(item.pubDate),
+            date: dateToTimestamp(item.pubDate),
             articleImage: item['media:thumbnail'] ? item['media:thumbnail'].url : null,
             label: label,
             source: "BBC",

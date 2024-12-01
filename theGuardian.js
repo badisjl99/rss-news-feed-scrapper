@@ -1,6 +1,6 @@
 const axios = require('axios');
 const xml2js = require('xml2js');
-const { analyzeSentiment, extractKeywords } = require("./analyzer");
+const { analyzeSentiment, extractKeywords ,dateToTimestamp} = require("./analyzer");
 const cheerio = require('cheerio'); 
 
 const rssUrls = [
@@ -84,7 +84,7 @@ async function fetchRssFeed(url) {
         headline: item.title,
         articleUrl: item.link,
         description: cleanDescription,
-        date: formatDate(item.pubDate),
+        date: dateToTimestamp(item.pubDate),
         articleImage: articleImage,
         label: analyzeSentiment(cleanDescription),
         source: "The Guardian",

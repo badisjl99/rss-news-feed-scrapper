@@ -1,6 +1,6 @@
 const axios = require('axios');
 const xml2js = require('xml2js');
-const { analyzeSentiment, extractKeywords } = require("./analyzer");
+const { analyzeSentiment, extractKeywords ,dateToTimestamp} = require("./analyzer");
 
 const rssUrls = [
   "https://www.indiatoday.in/rss/1206578"
@@ -54,7 +54,7 @@ async function fetchRssFeed(url) {
         headline: item.title,
         articleUrl: item.link.trim(),
         description: description.trim(),
-        date: formatDate(item.pubDate),
+        date: dateToTimestamp(item.pubDate),
         articleImage: articleImage,
         label: label,
         keywords: keywords,
