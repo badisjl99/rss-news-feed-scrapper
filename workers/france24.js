@@ -1,8 +1,8 @@
 const axios = require('axios');
 const xml2js = require('xml2js');
-const { extractKeywords, analyzeSentiment ,dateToTimestamp} = require('./analyzer');
+const { extractKeywords, analyzeSentiment } = require('./analyzer');
 
-async function fetchABCNewsFeed(url) {
+async function fetchFrance24Feed(url) {
   try {
     const response = await axios.get(url);
     const rssData = response.data;
@@ -23,7 +23,6 @@ async function fetchABCNewsFeed(url) {
       const pubDate = item.pubDate;
       const formattedDate = pubDate ? new Date(pubDate).toISOString().split('T')[0] : null;
 
-    
       const thumbnails = item['media:thumbnail'];
       const articleImage = Array.isArray(thumbnails)
         ? thumbnails.sort((a, b) => (b.width * b.height) - (a.width * a.height))[0]?.url
@@ -39,31 +38,30 @@ async function fetchABCNewsFeed(url) {
         date: formattedDate,
         articleImage,
         label: sentimentLabel,
-        source: "ABC News",
-        relatedCountry: "United States",
+        source: "France 24",
+        relatedCountry: "France",
         keywords,
-        bias: "left-center",
+        bias: "center",
         category: item.category?.trim() || "World"
       };
     }));
 
     return articles;
   } catch (error) {
-    console.error("Error fetching ABC News RSS feed:", error);
+    console.error("Error fetching France 24 RSS feed:", error);
     return [];
   }
 }
 
-async function getABCNews() {
-  const rssUrl = "https://abcnews.go.com/abcnews/internationalheadlines";
+async function getFrance24() {
+  const rssUrl = "https://www.france24.com/en/rss";
   try {
-    const articles = await fetchABCNewsFeed(rssUrl);
+    const articles = await fetchFrance24Feed(rssUrl);
+    console.log(articles) ;
     return articles;
   } catch (error) {
-    console.error("Error in getABCNews:", error);
+    console.error("Error in getFrance24:", error);
     return [];
   }
 }
-
-
-module.exports = { getABCNews };
+module.exports = { getFrance24 };

@@ -1,8 +1,8 @@
 const axios = require('axios');
 const xml2js = require('xml2js');
-const { extractKeywords, analyzeSentiment ,dateToTimestamp} = require('./analyzer');
+const { extractKeywords, analyzeSentiment } = require('./analyzer');
 
-async function fetchABCNewsFeed(url) {
+async function fetchAlJazeeraNewsFeed(url) {
   try {
     const response = await axios.get(url);
     const rssData = response.data;
@@ -23,15 +23,15 @@ async function fetchABCNewsFeed(url) {
       const pubDate = item.pubDate;
       const formattedDate = pubDate ? new Date(pubDate).toISOString().split('T')[0] : null;
 
-    
-      const thumbnails = item['media:thumbnail'];
-      const articleImage = Array.isArray(thumbnails)
-        ? thumbnails.sort((a, b) => (b.width * b.height) - (a.width * a.height))[0]?.url
-        : thumbnails?.url;
+      const articleImage = channel.image?.url;
 
       const keywords = await extractKeywords(headline || "");
       const sentimentLabel = await analyzeSentiment(description || "");
-
+      var category = item.category?.trim() || "World" ;
+      if (category === "Show Types") {
+        category = "World";
+      }
+      
       return {
         headline,
         articleUrl,
@@ -39,31 +39,32 @@ async function fetchABCNewsFeed(url) {
         date: formattedDate,
         articleImage,
         label: sentimentLabel,
-        source: "ABC News",
-        relatedCountry: "United States",
+        source: "Al Jazeera",
+        relatedCountry: "Qatar", 
         keywords,
-        bias: "left-center",
-        category: item.category?.trim() || "World"
+        bias: "left-center", 
+        category: category,
       };
     }));
 
     return articles;
   } catch (error) {
-    console.error("Error fetching ABC News RSS feed:", error);
+    console.error("Error fetching Al Jazeera RSS feed:", error);
     return [];
   }
 }
 
-async function getABCNews() {
-  const rssUrl = "https://abcnews.go.com/abcnews/internationalheadlines";
+async function getAlJazeera() {
+  const rssUrl = "https://www.aljazeera.com/xml/rss/all.xml";
   try {
-    const articles = await fetchABCNewsFeed(rssUrl);
+    const articles = await fetchAlJazeeraNewsFeed(rssUrl);
     return articles;
   } catch (error) {
-    console.error("Error in getABCNews:", error);
+    console.error("Error in getAlJazeera:", error);
     return [];
   }
 }
 
 
-module.exports = { getABCNews };
+
+module.exports = { getAlJazeera };

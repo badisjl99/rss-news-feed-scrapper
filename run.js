@@ -9,16 +9,17 @@ const { getIndiaToday } = require("./workers/indiaToday");
 const { getTheGuardian } = require("./workers/theGuardian");
 const { getTheLocal } = require("./workers/theLocal");
 const { getTelegraphNews} = require("./workers/telegraph") ;
-
+const { getAlJazeera }= require("./workers/alzajeera") ;
+const { getFrance24 } = require("./workers/france24") ;
+const { getMosaique } = require("./scrappers/getMosaiqueNews");
+const { name } = require("ejs");
 const app = express();
 const port = 3000;
 
-// Set the directory where JSON files are stored
 const jsonDirectory = path.join('/opt/render/project/src');
 
 app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));  // Ensure this directory exists
-
+app.set("views", path.join(__dirname, "views")); 
 function getTimestamp() {
     const now = new Date();
     const year = now.getFullYear();
@@ -38,7 +39,10 @@ async function scrapeAndSaveData() {
         { name: "India Today", func: getIndiaToday },
         { name: "The Local", func: getTheLocal },
         { name: "ABC", func: getABCNews } ,
-        { name: "Daily Telegraph", func: getTelegraphNews }
+        { name: "Al Jazeera", func: getAlJazeera } ,
+        {name : "France24" , func : getFrance24 } ,
+        { name: "Daily Telegraph", func: getTelegraphNews },
+        { name :"Mosaique FM",func:getMosaique }
     ];
 
     const allArticles = [];
@@ -81,11 +85,8 @@ app.get("/", (req, res) => {
 });
 
 app.get("/download-json", (req, res) => {
-    // Set the response to indicate a file download
     res.attachment('scraped_data.zip');
     const archive = archiver('zip');
-
-    // Pipe the archive data to the response
     archive.pipe(res);
 
     fs.readdir(jsonDirectory, (err, files) => {
@@ -93,8 +94,6 @@ app.get("/download-json", (req, res) => {
             console.error("Error reading directory:", err);
             return res.status(500).json({ message: "Error reading directory" });
         }
-
-        // Include only files that start with 'scraped_data'
         files.forEach(file => {
             if (file.startsWith('scraped_data') && file.endsWith('.json')) {
                 archive.file(path.join(jsonDirectory, file), { name: file });
